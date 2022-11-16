@@ -53,8 +53,8 @@ const App = () => {
         id: 3
       },
       {
-        name: 'bla',
-        exercises: 42,
+        name: 'Redux',
+        exercises: 11,
         id: 4
       }
     ]
