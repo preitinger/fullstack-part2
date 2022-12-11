@@ -1,49 +1,118 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import axios from 'axios';
+
+const Filter = ({filter, onFilterChange}) => {
+  return (
+    <>
+    filter shown with <input value={filter} onChange={onFilterChange} />
+    </>
+  )
+
+}
+const PersonForm = ({newName, newNumber, onNameChange, onNumberChange, onSubmit}) => {
+  return (
+    <form>
+      <div>
+        name: <input value={newName} onChange={onNameChange} />
+      </div>
+      <div>
+        number: <input value={newNumber} onChange={onNumberChange} />
+      </div>
+      <div>
+        <button type="submit" onClick={onSubmit}>add</button>
+      </div>
+    </form>
+  )
+}
 
 const Number = ({person}) => {
   return (
     <div>
-      {person.name}
+      {person.name} {person.number}
     </div>
   )
 }
 
+const Persons = ({persons, filter}) => {
+  console.log("Persons: ", persons)
+  return (
+    <>
+    {
+      persons.filter(person => person.name.toLowerCase().includes(filter.toLowerCase()))
+      .map((person) => (
+        <Number key={person.name} person={person}/>
+      ))
+    }
+    </>
+  )
+}
+
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: 'Arto Hellas' }
-  ])
+  const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
+  const [newNumber, setNewNumber] = useState('')
+  const [filter, setFilter] = useState("")
+
+  useEffect(() => {
+    const hasCanceled = {
+      canceled: false
+    }
+    axios.get("http://localhost:3001/persons")
+    .then(response => {
+      if (hasCanceled.canceled) {
+        console.log("return because canceled");
+        return;
+      }
+      console.log("set fetched persons");
+      setPersons(response.data);
+    })
+    console.log("started fetching data...");
+
+    return () => {
+      console.log("canceling axios.get(...)");
+      hasCanceled.canceled = true;
+    }
+  }, [])
+
+  const onFilterChange = (event) => {
+    setFilter(event.target.value);
+  }
 
   const onNameChange = (event) => {
     setNewName(event.target.value);
   }
 
+  const onNumberChange = (event) => {
+    setNewNumber(event.target.value);
+  }
+
   const onSubmit = (event) => {
     event.preventDefault();
+
+    if (persons.find(person => person.name === newName) != null) {
+      window.alert(`${newName} is already added to phonebook`);
+      return;
+    }
+
     const newPersons = persons.slice();
     newPersons.push({
-      name: newName
+      name: newName,
+      number: newNumber
     });
     setPersons(newPersons);
     setNewName("");
+    setNewNumber("");
   }
 
   return (
     <div>
       <h2>Phonebook</h2>
-      <form>
-        <div>
-          name: <input value={newName} onChange={onNameChange} />
-        </div>
-        <div>
-          <button type="submit" onClick={onSubmit}>add</button>
-        </div>
-      </form>
+      <Filter filter={filter} onFilterChange={onFilterChange}/>
+      <h2>add a new</h2>
+      <PersonForm newName={newName} onNameChange={onNameChange} newNumber={newNumber} onNumberChange={onNumberChange} onSubmit={onSubmit}/>
       <h2>Numbers</h2>
       <div>
-        {persons.map((person) => (
-          <Number key={person.name} person={person}/>
-        ))}
+        <Persons persons={persons} filter={filter}/>
       </div>
     </div>
   )
