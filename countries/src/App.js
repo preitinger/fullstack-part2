@@ -161,9 +161,10 @@ const App = () => {
   }, [shown])
 
   const onFilterChange = (event) => {
-    setFilter(event.target.value);
+    const newFilter = event.target.value;
+    setFilter(newFilter);
     const newFiltered = countries.filter(c => {
-      return c.name.common.toLowerCase().includes(filter.toLowerCase());
+      return c.name.common.toLowerCase().includes(newFilter.toLowerCase());
     });
     setFiltered(newFiltered);
     setShown(newFiltered.length === 1 ? newFiltered[0] : null);
