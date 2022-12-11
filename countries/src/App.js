@@ -16,14 +16,14 @@ const TooMany = () => {
   )
 }
 
-const CountryList = ({countries}) => {
+const CountryList = ({countries, onShow}) => {
   console.log("countries", countries);
   return (
     <div>
       {
         countries.map((c, i) => (
         <div key={i}>
-          {c.name.common}
+          {c.name.common} <button onClick={onShow(c)}>show</button>
         </div>
       ))
     }
@@ -64,6 +64,7 @@ const EmptyList = () => {
 const App = () => {
   const [countries, setCountries] = useState([]);
   const [filter, setFilter] = useState('');
+  const [shown, setShown] = useState(null);
   // was not sure if maybe the query in the country service should be used,
   // or if the complete country list should be loaded once at the start and then
   // all filtering/querying only be done internally.
@@ -105,6 +106,7 @@ const App = () => {
   }, [])
 
   const onFilterChange = (event) => {
+    setShown(null);
     setFilter(event.target.value);
   }
 
@@ -113,16 +115,20 @@ const App = () => {
     return c.name.common.toLowerCase().includes(filter.toLowerCase());
   });
 
+  const onShow = (country) => () => {
+    setShown(country);
+  }
+
   return (
     <div>
       <Filter filter={filter} onFilterChange={onFilterChange}/>
       {
-        filtered.length > 10
+        shown == null && filtered.length > 10
         ? <TooMany/>
-        : filtered.length > 1
-        ? <CountryList countries={filtered}/>
-        : filtered.length === 1
-        ? <BasicData country={filtered[0]} />
+        : shown == null && filtered.length > 1
+        ? <CountryList countries={filtered} onShow={onShow}/>
+        : shown != null || filtered.length === 1
+        ? <BasicData country={shown ? shown : filtered[0]} />
         : <EmptyList/>
       }
     </div>
