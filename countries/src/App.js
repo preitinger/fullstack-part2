@@ -17,7 +17,6 @@ const TooMany = () => {
 }
 
 const CountryList = ({countries, onShow}) => {
-  console.log("countries", countries);
   return (
     <div>
       {
@@ -31,8 +30,11 @@ const CountryList = ({countries, onShow}) => {
   )
 }
 
-const BasicData = ({country}) => {
-  const capital = [];
+// const fahrenheidToCelsius = (x) => {
+//   return (x - 32) * 5 / 9;
+// }
+
+const BasicData = ({country, weather}) => {
   return (
     <div>
       <h2>{country.name.common}</h2>
@@ -47,8 +49,26 @@ const BasicData = ({country}) => {
         }
       </ul>
       <div>
-      <img width="180px" src={country.flags.svg} alt={`flag of ${country.name.common}`}/>
+        <img width="180px" src={country.flags.svg} alt={`flag of ${country.name.common}`}/>
       </div>
+      <h3>Weather in {country.capital}</h3>
+      {
+        weather == null
+        ? "loading..."
+        :
+        <>
+        <div>
+          temperature {weather.main.temp}° Celsius
+        </div>
+        <div>
+          <img src={`http://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`} alt="Wetter Icon" />
+        </div>
+        <div>
+          wind {weather.wind.speed} m/s
+        </div>
+        </>
+      }
+
     </div>
   )
 }
@@ -65,6 +85,8 @@ const App = () => {
   const [countries, setCountries] = useState([]);
   const [filter, setFilter] = useState('');
   const [shown, setShown] = useState(null);
+  const [filtered, setFiltered] = useState([]);
+  const [weather, setWeather] = useState(null);
   // was not sure if maybe the query in the country service should be used,
   // or if the complete country list should be loaded once at the start and then
   // all filtering/querying only be done internally.
@@ -96,6 +118,7 @@ const App = () => {
       console.error("axios.get failed", error);
     })
 
+
     console.log("getting countries...");
 
     return () => {
@@ -105,19 +128,57 @@ const App = () => {
     }
   }, [])
 
+  useEffect(() => {
+    if (shown == null) return;
+    const hasCanceled = {canceled: false}
+    const abortController = new AbortController();
+    const lat = shown.capitalInfo.latlng[0];
+    const lon = shown.capitalInfo.latlng[1];
+    const api_key = process.env.REACT_APP_API_KEY
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${api_key}&units=metric`;
+    console.log("weather url", url);
+
+    axios.get(url, {
+      signal: abortController.signal
+    })
+    .then(response => {
+      console.log("weather reponse data", response.data);
+      setWeather(response.data);
+    })
+    .catch(error => {
+      if (hasCanceled.canceled) {
+        console.log("weather: return from catch because canceled");
+        return;
+      }
+      console.error("weather: axios.get failed", error);
+    })
+
+    return () => {
+      console.log("canceling weather");
+      hasCanceled.canceled = true;
+      abortController.abort();
+    }
+  }, [shown])
+
   const onFilterChange = (event) => {
-    setShown(null);
     setFilter(event.target.value);
+    const newFiltered = countries.filter(c => {
+      return c.name.common.toLowerCase().includes(filter.toLowerCase());
+    });
+    setFiltered(newFiltered);
+    setShown(newFiltered.length === 1 ? newFiltered[0] : null);
   }
 
-  const filtered = countries.filter(c => {
-    console.log(c);
-    return c.name.common.toLowerCase().includes(filter.toLowerCase());
-  });
+  // const filtered = countries.filter(c => {
+  //   console.log(c);
+  //   return c.name.common.toLowerCase().includes(filter.toLowerCase());
+  // });
 
   const onShow = (country) => () => {
     setShown(country);
   }
+
+  console.log("in rendering: shown=", shown);
 
   return (
     <div>
@@ -128,7 +189,7 @@ const App = () => {
         : shown == null && filtered.length > 1
         ? <CountryList countries={filtered} onShow={onShow}/>
         : shown != null || filtered.length === 1
-        ? <BasicData country={shown ? shown : filtered[0]} />
+        ? <BasicData country={shown ? shown : filtered[0]} weather={weather} />
         : <EmptyList/>
       }
     </div>
