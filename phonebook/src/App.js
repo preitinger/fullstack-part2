@@ -187,7 +187,7 @@ const App = () => {
     <div>
       <h2>Phonebook</h2>
       {
-        notificationText ? <>hm?<Notification text={notificationText} className={notificationClassName}/></>
+        notificationText ? <Notification text={notificationText} className={notificationClassName}/>
         : null
       }
       <Filter filter={filter} onFilterChange={onFilterChange}/>
