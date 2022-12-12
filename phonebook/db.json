@@ -1,5 +1,5 @@
 {
-  "persons":[
+  "persons": [
     {
       "name": "Arto Hellas",
       "number": "040-123456",
@@ -19,9 +19,14 @@
       "name": "Mary Poppendieck",
       "number": "39-23-6423122",
       "id": 4
+    },
+    {
+      "name": "Peter",
+      "number": "123",
+      "id": 5
     }
   ],
-  "test":[
+  "test": [
     {
       "name": "Peter Reitinger"
     },

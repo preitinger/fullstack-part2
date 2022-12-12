@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios';
+import phonebook from './services/phonebook'
 
 const Filter = ({filter, onFilterChange}) => {
   return (
@@ -57,14 +57,14 @@ const App = () => {
     const hasCanceled = {
       canceled: false
     }
-    axios.get("http://localhost:3001/persons")
-    .then(response => {
+    phonebook.getAll()
+    .then(persons1 => {
       if (hasCanceled.canceled) {
         console.log("return because canceled");
         return;
       }
       console.log("set fetched persons");
-      setPersons(response.data);
+      setPersons(persons1);
     })
     console.log("started fetching data...");
 
@@ -94,12 +94,10 @@ const App = () => {
       return;
     }
 
-    const newPersons = persons.slice();
-    newPersons.push({
-      name: newName,
-      number: newNumber
-    });
-    setPersons(newPersons);
+    phonebook.create({name: newName, number: newNumber})
+    .then(newPerson => {
+      setPersons(persons.concat(newPerson));
+    })
     setNewName("");
     setNewNumber("");
   }
