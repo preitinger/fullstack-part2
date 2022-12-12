@@ -25,22 +25,23 @@ const PersonForm = ({newName, newNumber, onNameChange, onNumberChange, onSubmit}
   )
 }
 
-const Number = ({person}) => {
+const Number = ({person, onDelete}) => {
   return (
     <div>
       {person.name} {person.number}
+      <button onClick={onDelete}>delete</button>
     </div>
   )
 }
 
-const Persons = ({persons, filter}) => {
+const Persons = ({persons, filter, onDelete}) => {
   console.log("Persons: ", persons)
   return (
     <>
     {
       persons.filter(person => person.name.toLowerCase().includes(filter.toLowerCase()))
       .map((person) => (
-        <Number key={person.name} person={person}/>
+        <Number key={person.name} person={person} onDelete={onDelete(person.id)}/>
       ))
     }
     </>
@@ -102,6 +103,24 @@ const App = () => {
     setNewNumber("");
   }
 
+  const onDelete = (id) => (event) => {
+    console.log("onDelete ", id);
+    let person = null;
+    const others = [];
+    persons.forEach((cur, i) => {
+      if (cur.id === id) {
+        person = cur;
+      } else {
+        others.push(cur);
+      }
+    });
+    console.log("person", person, "others", others);
+    if (window.confirm(`Delete ${person.name}?`)) {
+      phonebook.remove(id);
+      setPersons(others);
+    }
+  }
+
   return (
     <div>
       <h2>Phonebook</h2>
@@ -110,7 +129,7 @@ const App = () => {
       <PersonForm newName={newName} onNameChange={onNameChange} newNumber={newNumber} onNumberChange={onNumberChange} onSubmit={onSubmit}/>
       <h2>Numbers</h2>
       <div>
-        <Persons persons={persons} filter={filter}/>
+        <Persons persons={persons} filter={filter} onDelete={onDelete}/>
       </div>
     </div>
   )

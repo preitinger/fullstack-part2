@@ -13,9 +13,13 @@ const create = newObject => {
   return data(axios.post(baseUrl, newObject))
 }
 
+const remove = id => {
+  return axios.delete(`${baseUrl}/${id}`);
+}
+
 const update = (id, newObject) => {
   return data(axios.put(`${baseUrl}/${id}`, newObject))
 }
 
-const phonebook = {getAll, create, update}
+const phonebook = {getAll, create, remove, update}
 export default phonebook;
