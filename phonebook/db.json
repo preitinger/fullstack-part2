@@ -16,19 +16,19 @@
       "id": 4
     },
     {
-      "name": "b",
-      "number": "2",
-      "id": 5
-    },
-    {
-      "name": "Peter",
-      "number": "666",
-      "id": 6
-    },
-    {
-      "name": "Peter2",
-      "number": "5",
+      "name": "Klaus",
+      "number": "444",
       "id": 7
+    },
+    {
+      "name": "Müller",
+      "number": "123",
+      "id": 8
+    },
+    {
+      "name": "neuer",
+      "number": "123",
+      "id": 10
     }
   ],
   "test": [
