@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import phonebook from './services/phonebook'
 
-const NOTIFICATION_MS = 2000;
+const NOTIFICATION_MS = 5000;
 
 const Filter = ({filter, onFilterChange}) => {
   return (
@@ -119,6 +119,11 @@ const App = () => {
     setNewNumber(event.target.value);
   }
 
+  const notify = (text, className) => {
+    setNotificationText(text);
+    setNotificationClassName(className);
+  }
+
   const onSubmit = (event) => {
     event.preventDefault();
 
@@ -134,21 +139,17 @@ const App = () => {
       phonebook.create({name: newName, number: newNumber})
       .then(newPerson => {
         setPersons(persons.concat(newPerson));
-        setNotificationText(`Added ${newPerson.name}`);
-        setNotificationClassName("hint");
+        notify(`Added ${newPerson.name}`, "hint");
       })
     } else {
       if (window.confirm(`${person.name} is already in the phonebook. Replace the old number ${person.number} by ${newNumber}?`)) {
         phonebook.update(person.id, {...person, number: newNumber})
         .then(newPerson => {
           setPersons(persons.map(p => p.id === newPerson.id ? newPerson : p));
-          setNotificationText(`${person.name} has been changed: ${person.number} -> ${newPerson.number}`)
-          setNotificationClassName("hint");
-          console.log("notificationText has been set");
+          notify(`${person.name} has been changed: ${person.number} -> ${newPerson.number}`, "hint");
         })
         .catch(error => {
-          setNotificationText(`${person.name} has not been found. Probably has been deleted recently.`)
-          setNotificationClassName("error");
+          notify(`${person.name} has not been found. Probably has been deleted recently.`, "error");
         });
       }
     }
@@ -170,7 +171,12 @@ const App = () => {
     });
     console.log("person", person, "others", others);
     if (window.confirm(`Delete ${person.name}?`)) {
-      phonebook.remove(id);
+      setNotificationText(`Deleting ${person.name} ...`);
+      setNotificationClassName("hint");
+      phonebook.remove(id)
+      .then(() => {
+        notify(`${person.name} deleted`, "hint")
+      });
       setPersons(others);
     }
   }
@@ -182,7 +188,7 @@ const App = () => {
       <h2>Phonebook</h2>
       {
         notificationText ? <>hm?<Notification text={notificationText} className={notificationClassName}/></>
-        : <>keine notification</>
+        : null
       }
       <Filter filter={filter} onFilterChange={onFilterChange}/>
       <h2>add a new</h2>

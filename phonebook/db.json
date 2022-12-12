@@ -1,24 +1,9 @@
 {
   "persons": [
     {
-      "name": "Georg",
-      "number": "4",
-      "id": 2
-    },
-    {
-      "name": "Lisa",
-      "number": "5",
-      "id": 3
-    },
-    {
       "name": "a",
       "number": "01",
       "id": 4
-    },
-    {
-      "name": "Klaus",
-      "number": "444",
-      "id": 7
     },
     {
       "name": "Müller",
@@ -26,8 +11,13 @@
       "id": 8
     },
     {
-      "name": "neuer",
-      "number": "123",
+      "name": "Peter",
+      "number": "234",
+      "id": 9
+    },
+    {
+      "name": "James Bond",
+      "number": "007",
       "id": 10
     }
   ],
