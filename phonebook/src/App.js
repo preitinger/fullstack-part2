@@ -90,15 +90,28 @@ const App = () => {
   const onSubmit = (event) => {
     event.preventDefault();
 
-    if (persons.find(person => person.name === newName) != null) {
-      window.alert(`${newName} is already added to phonebook`);
-      return;
+    // old:
+    // if (persons.find(person => person.name === newName) != null) {
+    //   window.alert(`${newName} is already added to phonebook`);
+    //   return;
+    // }
+
+    // new:
+    const person = persons.find(person => person.name === newName);
+    if (person == null) {
+      phonebook.create({name: newName, number: newNumber})
+      .then(newPerson => {
+        setPersons(persons.concat(newPerson));
+      })
+    } else {
+      if (window.confirm(`${person.name} is already in the phonebook. Replace the old number ${person.number} by ${newNumber}?`)) {
+        phonebook.update(person.id, {...person, number: newNumber})
+        .then(newPerson => {
+          setPersons(persons.map(p => p.id === newPerson.id ? newPerson : p));
+        });
+      }
     }
 
-    phonebook.create({name: newName, number: newNumber})
-    .then(newPerson => {
-      setPersons(persons.concat(newPerson));
-    })
     setNewName("");
     setNewNumber("");
   }
